@@ -48,7 +48,7 @@ public class AI {
 		}
 
 		move.put(AmazonsGameMessage.QUEEN_POS_CURR, randomQueen);
-		move.put(AmazonsGameMessage.QUEEN_POS_NEXT, randomQueenMove);
+		move.put(AmazonsGameMessage.Queen_POS_NEXT, randomQueenMove);
 		System.out.println("Queen move: " + randomQueenMove.toString());
 		
 		ArrayList<ArrayList<Integer>> randomArrowMoves = getPossibleMoves(randomQueenMove);
@@ -94,7 +94,7 @@ public class AI {
 	public void updateGameState(Map<String, Object> move){
 		ArrayList<Integer> cur = (ArrayList<Integer>) move.get(AmazonsGameMessage.QUEEN_POS_CURR);
 		board.set((cur.get(0) * 11) + cur.get(1), 0);
-		ArrayList<Integer> next = (ArrayList<Integer>) move.get(AmazonsGameMessage.QUEEN_POS_NEXT);
+		ArrayList<Integer> next = (ArrayList<Integer>) move.get(AmazonsGameMessage.Queen_POS_NEXT);
 		board.set((next.get(0) * 11)+ next.get(1), player);
 		ArrayList<Integer> arrow = (ArrayList<Integer>) move.get(AmazonsGameMessage.ARROW_POS);
 		board.set((arrow.get(0) * 11) + arrow.get(1), 3);
