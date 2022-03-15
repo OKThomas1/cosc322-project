@@ -1,6 +1,6 @@
 # cosc322-project
 
-<h1> Game of Amazons AI Playe</h1>
+<h1> Game of Amazons AI Player</h1>
 
 This project is meant to create an AI player for the Game of Amazons.
 
