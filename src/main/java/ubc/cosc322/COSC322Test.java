@@ -101,6 +101,7 @@ public class COSC322Test extends GamePlayer{
 			Map<String, Object> nextMove = this.aiplayer.calculateNextMove();
 			System.out.println(nextMove.toString());
 			gameClient.sendMoveMessage(nextMove);
+			getGameGUI().updateGameState(nextMove);
 			
 		}
 		if(messageType.equals(GameMessage.GAME_ACTION_MOVE)){
@@ -112,8 +113,6 @@ public class COSC322Test extends GamePlayer{
 			gameClient.sendMoveMessage(nextMove);
 			this.aiplayer.updateGameState(nextMove);
 		}
-
-
 
     	return true;   	
     }
