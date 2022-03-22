@@ -100,18 +100,17 @@ public class COSC322Test extends GamePlayer{
 			this.aiplayer = new AI(board, 1);
 			Map<String, Object> nextMove = this.aiplayer.calculateNextMove();
 			System.out.println(nextMove.toString());
+			gameClient.sendMoveMessage(nextMove);
 			
 		}
 		if(messageType.equals(GameMessage.GAME_ACTION_MOVE)){
 			getGameGUI().updateGameState(msgDetails);
 			this.aiplayer.updateGameState(msgDetails);
-			//Send next move
-			//gameClient.sendMoveMessage(msDetails);
 
-			//something like
-			//Map<String, Object> nextMove = this.aiplayer.calculateNextMove();
-			//gameClient.sendMoveMessage(nextMove);
-			//this.aiplayer.updateGameState(nextMove);
+			Map<String, Object> nextMove = this.aiplayer.calculateNextMove();
+			System.out.println(nextMove.toString());
+			gameClient.sendMoveMessage(nextMove);
+			this.aiplayer.updateGameState(nextMove);
 		}
 
 

@@ -4,55 +4,93 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class miniMaxAI extends AI {
+import ubc.cosc322.AI.Move;
+
+public class miniMaxAI{
 	
 	public final int MAX = 1000;
 	public final int MIN = -1000;
 
-	public miniMaxAI(ArrayList<Integer> startBoard, int id) {
-		super(startBoard, id);
+	public ArrayList<Move> tree;
+
+	public miniMaxAI(ArrayList<Move> t) {
+		tree = t;
 	}
 	
 	public Map<String, Object> calculateNextMove(){ // use this to actually make the moves
-		HashMap<String, Object> move = new HashMap<String, Object>();
-		
-		return move;
+		Position bestPosition = new Position(MIN, null);
+		for(int i = 0; i < tree.size(); i++){
+			ArrayList<Integer> pos = new ArrayList<Integer>();
+			pos.add(i);
+			Position bestMove = calculateMiniMax(pos, 0, true, MIN, MAX);
+			if(bestMove.value > bestPosition.value){
+				bestPosition = bestMove;
+			}
+		}
+		return getParent(bestPosition.position).getMapMove();
 	}
 		
 	
 	// a minimax algorithm with alpha-beta pruning. use whenever you need to find the best possible move based on heuristic values
-	public int calculateMiniMax(int moveIndex, int depth, Boolean ourPlayer, ArrayList<Integer> possibleMoveWeights, int alpha, int beta) {
-		
-		if (depth == 3) 											//maximum depth for the search, can be modified, deeper = better but slower
-			return possibleMoveWeights.get(moveIndex); 				//returns the index of the weight of the best possible move, use this index later to find the move you need to make
-		if (ourPlayer) { 											//this is the maximizing case, we want out player to get the maximum 
-			int bestVal = MIN;
-			
-			for (int i = 0; i < 2; i++) { //splits the tree in half for searching left and right children
-				int value = calculateMiniMax(moveIndex*2+i, depth + 1, false, possibleMoveWeights, alpha, beta);
-				bestVal = Math.max(bestVal, value);
-				alpha = Math.max(bestVal, alpha);
+	public Position calculateMiniMax(ArrayList<Integer> position, int depth, Boolean self, int alpha, int beta) {
+		Move current = getNode(position);
+		if (depth == 2) 											//maximum depth for the search, can be modified, deeper = better but slower
+			return new Position(current.score, position);				//returns the index of the weight of the best possible move, use this index later to find the move you need to make
+		if (self) { 											//this is the maximizing case, we want out player to get the maximum 
+			Position bestPosition = new Position(MIN, null);
+			for (int i = 0; i < current.children.size(); i++) { //splits the tree in half for searching left and right children
+				ArrayList<Integer> newPosition = (ArrayList<Integer>) position.clone();
+				newPosition.add(i);
+				Position pos = calculateMiniMax(newPosition, depth + 1, false, alpha, beta);
+				if(pos.value > bestPosition.value){
+					bestPosition = pos;
+				}
+				alpha = Math.max(bestPosition.value, alpha);
 				
 				if (alpha >= beta) 
 					break;
 			}
-			return bestVal;
+			return bestPosition;
 		} else { 					//trying to minimize the value of our rival's moves
-			int bestVal = MAX;
+			Position bestPosition = new Position(MAX, null);
 			
-			for (int i = 0; i < 2; i++) {
-				int value = calculateMiniMax(moveIndex*2+i, depth + 1, true, possibleMoveWeights, alpha, beta);
-				bestVal = Math.min(bestVal, value);
-				beta = Math.min(bestVal, beta);
+			for (int i = 0; i < current.children.size(); i++) {
+				ArrayList<Integer> newPosition = (ArrayList<Integer>) position.clone();
+				newPosition.add(i);
+				Position pos = calculateMiniMax(newPosition, depth + 1, true, alpha, beta);
+				if(pos.value < bestPosition.value){
+					bestPosition = pos;
+				}
+				beta = Math.min(bestPosition.value, beta);
 				
 				if (alpha >= beta)
 					break;
 			} 
-			return bestVal;
+			return bestPosition;
 		}
+	}
+
+	public Move getNode(ArrayList<Integer> position){
+		Move current = tree.get(position.get(0));
+		for(int i = 1; i < position.size(); i++){
+			current = current.children.get(position.get(i));
+		}
+		return current;
+	}
+
+	public Move getParent(ArrayList<Integer> position){
 		
-		
-	
+		return tree.get(position.get(0));
+	}
+
+	public class Position{
+		int value;
+		ArrayList<Integer> position;
+
+		public Position(int v, ArrayList<Integer> p){
+			value = v;
+			position = p;
+		}
 	}
 
 }
