@@ -19,6 +19,7 @@ public class miniMaxAI{
 	
 	public Map<String, Object> calculateNextMove(){ // use this to actually make the moves
 		Position bestPosition = new Position(MIN, null);
+		System.out.println(tree.size());
 		for(int i = 0; i < tree.size(); i++){
 			ArrayList<Integer> pos = new ArrayList<Integer>();
 			pos.add(i);
@@ -38,6 +39,9 @@ public class miniMaxAI{
 			return new Position(current.score, position);				//returns the index of the weight of the best possible move, use this index later to find the move you need to make
 		if (self) { 											//this is the maximizing case, we want out player to get the maximum 
 			Position bestPosition = new Position(MIN, null);
+			if(current.children.size() == 0){
+				return new Position(current.score, position);
+			}	
 			for (int i = 0; i < current.children.size(); i++) { //splits the tree in half for searching left and right children
 				ArrayList<Integer> newPosition = (ArrayList<Integer>) position.clone();
 				newPosition.add(i);
@@ -53,7 +57,9 @@ public class miniMaxAI{
 			return bestPosition;
 		} else { 					//trying to minimize the value of our rival's moves
 			Position bestPosition = new Position(MAX, null);
-			
+			if(current.children.size() == 0){
+				return new Position(current.score, position);
+			}	
 			for (int i = 0; i < current.children.size(); i++) {
 				ArrayList<Integer> newPosition = (ArrayList<Integer>) position.clone();
 				newPosition.add(i);

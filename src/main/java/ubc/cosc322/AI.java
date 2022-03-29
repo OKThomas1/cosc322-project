@@ -24,13 +24,24 @@ public class AI {
 	}
 
 	public Map<String, Object> calculateNextMove(){
+
+
 		ArrayList<Move> moveTree = new ArrayList<Move>();
 		getBestMove(player, moveTree, null);
+		if(moveTree.size() == 0){
+			ArrayList<ArrayList<Integer>> queens = getQueenLocations(player);
+			for(ArrayList<Integer> queen : queens){
+				ArrayList<ArrayList<Integer>> moves = getPossibleMoves(queen);
+			}
+			return null;
+		}
 		for(Move move : moveTree){
 			getBestMove(opponent, move.children, move);
-			for(Move childMove: move.children){
-				getBestMove(player, childMove.children, childMove);
-			}
+			if(move.children.size() != 0){
+				for(Move childMove: move.children){
+					getBestMove(player, childMove.children, childMove);
+				}
+			} 
 		}
 		miniMaxAI treeSearch = new miniMaxAI(moveTree);
 
@@ -50,7 +61,7 @@ public class AI {
 			}
 			while(moveStack.size() != 0){
 				cur = moveStack.pop();
-				updateGameState(cur.getMapMove());
+				updateGameState(cur.getMapMove(), cur.person == player ? true : false);
 			}
 		}
 
@@ -75,32 +86,37 @@ public class AI {
 		Move bestMove = null;		
 		Move secondBestMove = null;		
 
-		while(i.hasNext() && count < 2){
+		while(i.hasNext()){
 			Map.Entry<Integer, ArrayList<ArrayList<Integer>>> move = (Map.Entry<Integer, ArrayList<ArrayList<Integer>>>) i.next();
 			ArrayList<Integer> queenCur = move.getValue().get(0);
 			ArrayList<Integer> queenNext = move.getValue().get(1);
+			ArrayList<Integer> backup = (ArrayList<Integer>) board.clone();
+			updateQueen(queenCur, queenNext, person);
 			ArrayList<ArrayList<Integer>> arrowMoves = getPossibleMoves(queenNext);
 			for(ArrayList<Integer> arrowMove: arrowMoves){
-				ArrayList<Integer> backup = (ArrayList<Integer>) board.clone();
-				updateQueen(queenCur, queenNext, person);
+				ArrayList<Integer> backup2 = (ArrayList<Integer>) board.clone();
 				updateArrow(arrowMove);	
 				int score = calculateBoard(person);
 				if(score > bestScore && score > secondBestScore){
 					secondBestScore = bestScore;
 					bestScore = score;
 					secondBestMove = bestMove;
-					bestMove = new Move(queenCur, queenNext, arrowMove, board, score, current);
+					bestMove = new Move(queenCur, queenNext, arrowMove, board, score, current, person);
 				} else if (score > secondBestScore){
 					secondBestScore = score;
-					secondBestMove = new Move(queenCur, queenNext, arrowMove, board, score, current);
+					secondBestMove = new Move(queenCur, queenNext, arrowMove, board, score, current, person);
 				}
-				board = backup;
+				board = backup2;
 			}
+			board = backup;
 			count++;
 		}
-		
-		moveTree.add(bestMove);
-		moveTree.add(secondBestMove);
+		if(bestMove != null){
+			moveTree.add(bestMove);
+		}	
+		if(secondBestMove != null){
+			moveTree.add(secondBestMove);
+		}
 		board = originalBoard;
 	}
 
@@ -113,6 +129,8 @@ public class AI {
 				if(board.get((row * 11) + column) == 0){
 					ArrayList<Integer> move = new ArrayList<Integer>(List.of(row, column));
 					possibleMoves.add(move);
+				} else {
+					break;
 				}
 				row += direction[0];
 				column += direction[1];
@@ -231,11 +249,11 @@ public class AI {
 		return move;
 	}
 
-	public void updateGameState(Map<String, Object> move){
+	public void updateGameState(Map<String, Object> move, boolean self){
 		ArrayList<Integer> cur = (ArrayList<Integer>) move.get(AmazonsGameMessage.QUEEN_POS_CURR);
 		board.set((cur.get(0) * 11) + cur.get(1), 0);
 		ArrayList<Integer> next = (ArrayList<Integer>) move.get(AmazonsGameMessage.QUEEN_POS_NEXT);
-		board.set((next.get(0) * 11)+ next.get(1), player);
+		board.set((next.get(0) * 11)+ next.get(1), self ? player : opponent);
 		ArrayList<Integer> arrow = (ArrayList<Integer>) move.get(AmazonsGameMessage.ARROW_POS);
 		board.set((arrow.get(0) * 11) + arrow.get(1), 3);
 	}
@@ -257,14 +275,16 @@ public class AI {
 		public ArrayList<Integer> board;
 		public Move parent;
 		public int score;
+		public int person;
 
-		public Move(ArrayList<Integer> cur, ArrayList<Integer> next, ArrayList<Integer> ar, ArrayList<Integer> bo, int sc, Move parent){
+		public Move(ArrayList<Integer> cur, ArrayList<Integer> next, ArrayList<Integer> ar, ArrayList<Integer> bo, int sc, Move parent, int player){
 			queenCur = cur;
 			queenNext = next;
 			arrow = ar;
 			board = bo;
 			score = sc;
 			children = new ArrayList<Move>();
+			person = player;
 		}
 
 		public Map<String, Object> getMapMove(){

@@ -4,6 +4,7 @@ package ubc.cosc322;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import sfs2x.client.entities.Room;
 import ygraph.ai.smartfox.games.Amazon;
@@ -43,19 +44,20 @@ public class COSC322Test extends GamePlayer{
 			arg0 = args[0];
 			arg1 = args[1];
 		}
-    	COSC322Test player = new COSC322Test(arg0, arg1);
+    	COSC322Test player2 = new COSC322Test(arg0, arg1);
     	
-    	if(player.getGameGUI() == null) {
-    		player.Go();
+    	if(player2.getGameGUI() == null) {
+    		player2.Go();
     	}
     	else {
     		BaseGameGUI.sys_setup();
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
-                	player.Go();
+                	player2.Go();
                 }
             });
     	}
+		
 
     }
 	
@@ -94,27 +96,26 @@ public class COSC322Test extends GamePlayer{
     	//see the method GamePlayer.handleGameMessage() in the game-client-api document. 
 	
 		System.out.println("Receiving message of type " + messageType);
-		if(messageType.equals(GameMessage.GAME_STATE_BOARD)){
-			ArrayList<Integer> board = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE);
-			getGameGUI().setGameState(board);
-			this.aiplayer = new AI(board, 1);
-			Map<String, Object> nextMove = this.aiplayer.calculateNextMove();
-			System.out.println(nextMove.toString());
-			gameClient.sendMoveMessage(nextMove);
-			getGameGUI().updateGameState(nextMove);
-			
-		}
-		if(messageType.equals(GameMessage.GAME_ACTION_MOVE)){
-			getGameGUI().updateGameState(msgDetails);
-			this.aiplayer.updateGameState(msgDetails);
+if(messageType.equals(GameMessage.GAME_STATE_BOARD)){
+  ArrayList<Integer> board = (ArrayList<Integer>) msgDetails.get(AmazonsGameMessage.GAME_STATE);
+  getGameGUI().setGameState(board);
+  this.aiplayer = new AI(board, 1);          
+}
 
-			Map<String, Object> nextMove = this.aiplayer.calculateNextMove();
-			System.out.println(nextMove.toString());
-			gameClient.sendMoveMessage(nextMove);
-			this.aiplayer.updateGameState(nextMove);
-		}
-
-    	return true;   	
+if(messageType.equals(GameMessage.GAME_ACTION_MOVE)){
+  getGameGUI().updateGameState(msgDetails);
+  this.aiplayer.updateGameState(msgDetails, false);
+  Map<String, Object> nextMove = this.aiplayer.calculateNextMove();
+  if(nextMove == null){
+	System.out.println("SURRENDER");
+	return false;
+  }
+  System.out.println(nextMove.toString());
+  gameClient.sendMoveMessage(nextMove);
+  this.aiplayer.updateGameState(nextMove, true);
+  getGameGUI().updateGameState(nextMove);
+}
+   	return true;   	
     }
     
     
