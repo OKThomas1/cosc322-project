@@ -1,7 +1,6 @@
 package ubc.cosc322;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import ubc.cosc322.AI.Move;
@@ -10,6 +9,7 @@ public class miniMaxAI{
 	
 	public final int MAX = 1000;
 	public final int MIN = -1000;
+	public final int DEPTH = AI.DEPTH;
 
 	public ArrayList<Move> tree;
 
@@ -17,7 +17,7 @@ public class miniMaxAI{
 		tree = t;
 	}
 	
-	public Map<String, Object> calculateNextMove(){ // use this to actually make the moves
+	public Map<String, Object> calculateNextMove(){ 
 		Position bestPosition = new Position(MIN, null);
 		System.out.println(tree.size());
 		for(int i = 0; i < tree.size(); i++){
@@ -32,17 +32,16 @@ public class miniMaxAI{
 	}
 		
 	
-	// a minimax algorithm with alpha-beta pruning. use whenever you need to find the best possible move based on heuristic values
 	public Position calculateMiniMax(ArrayList<Integer> position, int depth, Boolean self, int alpha, int beta) {
 		Move current = getNode(position);
-		if (depth == 2) 											//maximum depth for the search, can be modified, deeper = better but slower
-			return new Position(current.score, position);				//returns the index of the weight of the best possible move, use this index later to find the move you need to make
-		if (self) { 											//this is the maximizing case, we want out player to get the maximum 
+		if (depth >= DEPTH) 											
+			return new Position(current.score, position);				
+		if (self) { 											
 			Position bestPosition = new Position(MIN, null);
 			if(current.children.size() == 0){
 				return new Position(current.score, position);
 			}	
-			for (int i = 0; i < current.children.size(); i++) { //splits the tree in half for searching left and right children
+			for (int i = 0; i < current.children.size(); i++) { 
 				ArrayList<Integer> newPosition = (ArrayList<Integer>) position.clone();
 				newPosition.add(i);
 				Position pos = calculateMiniMax(newPosition, depth + 1, false, alpha, beta);
@@ -85,7 +84,7 @@ public class miniMaxAI{
 	}
 
 	public Move getParent(ArrayList<Integer> position){
-		
+
 		return tree.get(position.get(0));
 	}
 

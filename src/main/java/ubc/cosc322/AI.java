@@ -16,6 +16,8 @@ public class AI {
 	int player;
 	int opponent;
 	int[][] directions = {{-1,-1}, {-1,0}, {-1,1}, {0,-1}, {0,1}, {1,-1}, {1,0}, {1,1}};
+	public static final int DEPTH = 3;
+	public static final int WIDTH = 3;
 
 	public AI(ArrayList<Integer> startBoard, int id){
 		board = startBoard;
@@ -27,25 +29,24 @@ public class AI {
 
 
 		ArrayList<Move> moveTree = new ArrayList<Move>();
-		getBestMove(player, moveTree, null);
+		fillMoveTree(player, 0, moveTree, null);
 		if(moveTree.size() == 0){
-			ArrayList<ArrayList<Integer>> queens = getQueenLocations(player);
-			for(ArrayList<Integer> queen : queens){
-				ArrayList<ArrayList<Integer>> moves = getPossibleMoves(queen);
-			}
 			return null;
-		}
-		for(Move move : moveTree){
-			getBestMove(opponent, move.children, move);
-			if(move.children.size() != 0){
-				for(Move childMove: move.children){
-					getBestMove(player, childMove.children, childMove);
-				}
-			} 
 		}
 		miniMaxAI treeSearch = new miniMaxAI(moveTree);
 
 		return treeSearch.calculateNextMove();
+	}
+
+	public void fillMoveTree(int person, int depth, ArrayList<Move> tree, Move current){
+		if(depth >= DEPTH){
+			return;
+		}
+		getBestMove(person, tree, current);
+		for(Move move: tree){
+			fillMoveTree(person == player ? opponent : player, depth+1, move.children, move);
+		}
+
 	}
 
 	public void getBestMove(int person, ArrayList<Move> moveTree, Move current){
@@ -78,14 +79,9 @@ public class AI {
 			}
 		}
 
-		int count = 0;
 		Set<Map.Entry<Integer, ArrayList<ArrayList<Integer>>>> set = scores.entrySet();
 		Iterator<Map.Entry<Integer, ArrayList<ArrayList<Integer>>>> i = set.iterator();
-		int bestScore = -1000;
-		int secondBestScore = -1000;
-		Move bestMove = null;		
-		Move secondBestMove = null;		
-
+		TreeMap<Integer, Move> bestMoves = new TreeMap<Integer, Move>(Collections.reverseOrder());
 		while(i.hasNext()){
 			Map.Entry<Integer, ArrayList<ArrayList<Integer>>> move = (Map.Entry<Integer, ArrayList<ArrayList<Integer>>>) i.next();
 			ArrayList<Integer> queenCur = move.getValue().get(0);
@@ -97,25 +93,21 @@ public class AI {
 				ArrayList<Integer> backup2 = (ArrayList<Integer>) board.clone();
 				updateArrow(arrowMove);	
 				int score = calculateBoard(person);
-				if(score > bestScore && score > secondBestScore){
-					secondBestScore = bestScore;
-					bestScore = score;
-					secondBestMove = bestMove;
-					bestMove = new Move(queenCur, queenNext, arrowMove, board, score, current, person);
-				} else if (score > secondBestScore){
-					secondBestScore = score;
-					secondBestMove = new Move(queenCur, queenNext, arrowMove, board, score, current, person);
-				}
+				bestMoves.put(score, new Move(queenCur, queenNext, arrowMove, board, score, current, person));
 				board = backup2;
 			}
 			board = backup;
-			count++;
 		}
-		if(bestMove != null){
-			moveTree.add(bestMove);
-		}	
-		if(secondBestMove != null){
-			moveTree.add(secondBestMove);
+		Set<Map.Entry<Integer, Move>> moveSet = bestMoves.entrySet();
+		Iterator<Map.Entry<Integer, Move>> moveIt = moveSet.iterator();
+		int count = 0;
+		while(moveIt.hasNext()){
+			if(count >= WIDTH){
+				break;
+			}
+			Map.Entry<Integer, Move> move = (Map.Entry<Integer, Move>) moveIt.next();
+			moveTree.add(move.getValue());
+			count++;
 		}
 		board = originalBoard;
 	}

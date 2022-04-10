@@ -1,19 +1,13 @@
 
 package ubc.cosc322;
 
-import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import sfs2x.client.entities.Room;
-import ygraph.ai.smartfox.games.Amazon;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
 import ygraph.ai.smartfox.games.GameMessage;
 import ygraph.ai.smartfox.games.GamePlayer;
 import ygraph.ai.smartfox.games.amazons.HumanPlayer;
-import ygraph.ai.smartfox.games.amazons.AmazonsBoard;
 import ygraph.ai.smartfox.games.amazons.AmazonsGameMessage;
 
 /**
@@ -107,8 +101,8 @@ if(messageType.equals(GameMessage.GAME_ACTION_MOVE)){
   this.aiplayer.updateGameState(msgDetails, false);
   Map<String, Object> nextMove = this.aiplayer.calculateNextMove();
   if(nextMove == null){
-	System.out.println("SURRENDER");
-	return false;
+    System.out.println("SURRENDER");
+    return false;
   }
   System.out.println(nextMove.toString());
   gameClient.sendMoveMessage(nextMove);
